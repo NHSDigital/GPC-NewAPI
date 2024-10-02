@@ -1,49 +1,36 @@
 # This is an OpenAPI Specification (https://swagger.io/specification/)
-# for gp-connect/GPC-NewAPI/FHIR/R4 owned by NHS Digital (https://digital.nhs.uk/)
+# for gp-connect/patient-facing/prescriptions-management-fhir/FHIR/R4 owned by NHS Digital (https://digital.nhs.uk/)
 openapi: '3.0.0'
 info:
-  title: 'GP Connect New FHIR API (PoC)'
+  title: 'GP Connect New API'
   version: 'Computed and injected at build time by `scripts/set_version.py`'
   description: |
     ## Overview
 
-    ![GP Connect New API (Proof of Concept) Overview](https://raw.githubusercontent.com/NHSDigital/GPC-NewAPI/master/specification/images/overview.png)
+    ![GP Connect Patient Facing Prescriptions Management API Overview](https://raw.githubusercontent.com/NHSDigital/GPC-NewAPI/main/specification/images/overview.png)
 
-    Use this API to post to a patients record at an electronic health system. This API aims to fulfil the requirements for the 
+    Use this API to manage a patient's clinical record from a healthcare setting.
 
     You can:
 
-    * request a new instance of a repeat prescription
+    * add a new consultation to the patient's record
+    
+    * add a new consultation together with observations to a patient's record
 
     * view all of a patients medications, whether acute or repeat, past or present
 
-    * cancel a repeat prescription request
+    
 
-    * check the status of a current prescription request
+    The end user must be a healthcare practitioner who is:
 
-    * request a new instance of a repeat prescription to a one off nomination pharmacy
+    *  registered with an NHS CIS2 account
 
-    The end user must be a patient who is:
 
-    *  registered with the GP practice
+    ## Who can use this API?
 
-    *  registered with NHS login to P9 identity verification level
+    This API can be used by developers of clinical systems that support clinicans delivering direct care.
 
-    For example:
 
-    * a patient can view their own medication, request a new instance of a repeat prescription and cancel that request
-
-    ## Who can use this API
-
-    This API can be used by developers of clinical systems that support clinicans delivering direct care. It is a patient-facing API.
-
-    This API:
-
-    * is intended only for use by patient-facing applications
-
-    * is intended only for non-clinical use
-
-    * can only be used where there is a legal basis to do so
 
     Make sure you have a valid use case before you go too far with development. To do this, contact us.
 
@@ -65,13 +52,6 @@ info:
 
     ## Related APIs
 
-    * [Electronic Prescription Service - FHIR API](https://digital.nhs.uk/developer/api-catalogue/electronic-prescription-service-fhir) - use this API to issue requested prescriptions as electronic prescriptions.
-
-    * [Electronic Prescription Service Tracker - REST API](https://digital.nhs.uk/developer/api-catalogue/spine-electronic-prescription-service-tracker-rest) - use this API to track the dispensing status of EPS prescriptions once they leave the GP system.
-
-    * [GP Connect (Patient Facing) User Permissions API](https://digital.nhs.uk/developer/api-catalogue/gp-connect-patient-facing-user-permissions) - use this API to manage a patient's permissions as held by the GP practice systems.
-
-    * [GP Connect (Patient Facing) Appointment Management - FHIR API](https://digital.nhs.uk/developer/api-catalogue/gp-connect-patient-facing-appointment-management-fhir) - use this API to manage GP practice appointments.
 
     * [GP Connect (Patient Facing) Access Record - FHIR API](https://digital.nhs.uk/developer/api-catalogue/gp-connect-patient-facing-access-record-fhir) - use this API to manage a patient's medical record from the GP practice systems.
 
@@ -112,9 +92,8 @@ info:
 
     ### Resources
 
-    Use the [GP Connect Prescriptions Management Implementation Guide](https://simplifier.net/guide/gp-connect--patient-facing-services--prescriptions?version=0.1.1-private-beta) to assist with your integration.
+    Use the [{insert spec here}](https://simplifier.net) to assist with your integration.
 
-    This is the FHIR specification for GP Connect Prescriptions.
 
     ## Network access
 
@@ -124,13 +103,7 @@ info:
 
     ## Security and authorisation
 
-    This API is [user-restricted](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation#user-restricted-apis), meaning an end user must be present and authenticated to use it.
 
-    The end user must be:
-
-    * a patient
-
-    * authenticated with NHS login to P9 identity verification level
 
     The API uses Open ID Connect to authenticate the end user and OAuth 2.0 to authorise the calling system. It supports the following security pattern using NHS login:
 
@@ -191,27 +164,19 @@ info:
     Errors specific to each API are shown in the Endpoints section, under Response. See our [reference guide](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#http-status-codes) for more on errors.
 
     API Specific errors can be found [here](https://simplifier.net/guide/gp-connect--patient-facing-services--prescriptions/Home/Design/Errors-and-issues?version=0.1.1-private-beta).
-  contact:
-    name: 'gp-connect/patient-facing/prescriptions-management-fhir/FHIR/R4 API Support'
-    url: 'https://digital.nhs.uk/developer/help-and-support'
-    email: api.management@nhs.net
+
 x-spec-publication:
   operation-order:
     - operations:
         - method: GET
-          path: /{id}/MedicationStatement
-        - method: GET
-          path: /MedicationRequest/{id}
+          path: /{id}/Observation
+        - method: POST
+          path: /Bundle
         - method: GET
           path: /Patient/{id}/MedicationRequest
         - method: POST
-          path: /Task
-        - method: GET
-          path: /Task
-        - method: PATCH
-          path: /Task
-        - method: GET
-          path: /PractionerRole/{id}
+        
+
 servers:
   - url: 'https://sandbox.api.service.nhs.uk/gp-connect/patient-facing/prescriptions-management-fhir/FHIR/R4'
     description: Sandbox environment.
@@ -220,10 +185,10 @@ servers:
   - url: 'https://api.service.nhs.uk/gp-connect/patient-facing/prescriptions-management-fhir/FHIR/R4'
     description: Production environment.
 paths:
-  /Patient/{id}/MedicationStatement:
-    get:
+  /Encounter:
+    post:
       operationId: get-medicationstatement
-      summary: Get medications relating to a patient
+      summary: Add a new consultation
       description: >
         ## Overview
 
@@ -459,304 +424,7 @@ paths:
                               code: INVALID_NHS_NUMBER
                               display: Invalid NHS Number
 
-  /MedicationRequest/{id}:
-    get:
-      operationId: get-planned-medicationrequest
-      summary: Get a specific planned medication request
-      description: >
-        ## Overview
 
-        Use this endpoint to get specific MedicationRequests. 
-
-
-        The request must include the following parameter:
-
-
-        * id
-
-        * patient
-
-        
-        ## Use cases
-
-        Use cases covered by this endpoint include:
-
-        
-        * to resolve references for MedicationRequest's from other responses
-
-        
-        * to resolve the BasedOn reference to confirm whether the MedicationStatement is representing an acute or repeat Medication
-
-        
-        * to get further information about what medication the Task is focused by resolving the focus reference
-
-
-      parameters:
-        - $ref: "#/components/parameters/BearerAuthorization"
-        - $ref: "#/components/parameters/CorrelationID"
-        - $ref: "#/components/parameters/RequestID"
-        - in: path
-          name: id
-          description: >
-            The id of the MedicationRequest you are searching for
-          required: true
-          schema:
-            type: string
-            example: '0ae6ac98-6b0f-404f-a95b-c38a4318f686'
-        - in: query
-          name: patient
-          description: The NHS number of the patient for whom the medication request belongs.
-          required: true
-          schema:
-            type: string
-            example: '9000000009'
-      responses:
-        '200':
-          description: Successful request to view current and previous prescription details
-          content:
-            application/fhir+json:
-              schema:
-                $ref: "#/components/schemas/SingularMedicationRequestSchema"
-              examples:
-                example:
-                  value:
-                    resourceType: MedicationRequest
-                    id: b269d1d7-1acf-47bb-8b3c-e38b583d9a07
-                    meta:
-                      profile:
-                        - https://fhir.hl7.org.uk/StructureDefinition/UKCore-MedicationRequest
-                    extension:
-                      - url: https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-MedicationRepeatInformation
-                        extension:
-                          - url: numberOfPrescriptionsIssued
-                            valueUnsignedInt: 1
-                          - url: authorisationExpiryDate
-                            valueDateTime: 2023-09-10T19:00:00.000Z
-                    identifier:
-                      - system: "https://tools.ietf.org/html/rfc4122"
-                        value: 42b4a841-9d69-4d13-bf91-ee5882e85765
-                    status: active
-                    intent: plan
-                    category:
-                      - coding:
-                          - system: "http://terminology.hl7.or/CodeSystem/medicationrequest-category"
-                            code: community
-                            display: Community
-                    medicationCodeableConcept:
-                      coding:
-                        - system: "https://dmd.nhs.uk"
-                          code: '3113111000001106'
-                          display: Pulmicort 100 Turbohaler (AstraZeneca UK Ltd)
-                    subject:
-                      reference: Patient/9000000009
-                      identifier:
-                        system: https://fhir.nhs.uk/Id/nhs-number
-                        value: '9000000009'
-                      display: Jane Smith
-                    requester:
-                      reference: PractitionerRole/ed313d93-f470-420f-ae4e-2b7eb91d3f45
-                      display: Dr Jane Smith
-                    groupIdentifier:
-                        system: "https://fhir.nhs.uk/Id/prescription-order-number"
-                        value: PDI12E-Y765908-4FF3LQ
-                    courseOfTherapyType:
-                      coding:
-                        - system: "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy"
-                          code: continuous
-                          display: Continuous long term therapy
-                    authoredOn: 2022-10-13T16:20:27+07:00
-                    substitution:
-                      allowedBoolean: false
-                    dosageInstruction:
-                      - text: One to two puffs to be inhaled as needed
-                        method:
-                          coding:
-                            - system: "http://snomed.info/sct"
-                              code: '420652005'
-                              display: Until gone
-                    dispenseRequest:
-                      numberOfRepeatsAllowed: 6
-                      quantity:
-                        value: 1
-                        unit: inhaler
-                        system: http://snomed.info/sct
-                        code: '334980009'
-        4XX:
-          description: |
-            An error occurred as follows:
-
-
-            | HTTP Status | Spine error code   | Description
-            |-------------|--------------------|------------
-            | 400         | BAD_REQUEST        | X-Request-ID is not present
-            | 403         | ACCESS_DENIED      | Access denied, the patient logged in does not have the correct access level
-            | 404         | RESOURCE_NOT_FOUND | The request is for a MedicationRequest that doesn't exist
-            | 422         | INVALID_PARAMETER  | The MedicationRequest id supplied is invalid
-            | 400         | INVALID_NHS_NUMBER | The NHS number provided is invalid, for example it fails format or check digit tests    
-            | 422         | INVALID_PARAMETER  | The patient parameter is not provided                                          
-          content:
-            application/fhir+json:
-              schema:
-                type: object
-                description: Link to UKCore-OperationOutcome resource population guidance [here](https://simplifier.net/guide/gp-connect--patient-facing-services--prescriptions/Home/FHIR-Assets/All-Assets/Profiles/UKCore-OperationOutcome?version=0.1.1-private-beta).
-              examples:
-                example:
-                  value:
-                    resourceType: OperationOutcome
-                    meta:
-                      profile:
-                        - https://fhir.hl7.org.uk/StructureDefinition/UKCore-OperationOutcome
-                    issue:
-                      - severity: error
-                        code: value
-                        details:
-                          coding:
-                            - system: https://fhir.nhs.uk/R4/ValueSet/Spine-ErrorOrWarningCode-1
-                              code: INVALID_NHS_NUMBER
-                              display: Invalid NHS Number
-  /Patient/{id}/MedicationRequest:
-    get:
-      operationId: get-ordered-medicationrequest
-      summary: Get prescription issue details
-      description: >
-        ## Overview
-
-        Use this endpoint to get details of previous prescription issues.
-
-        The request must include the following parameter:
-
-
-        * patient
-
-
-        The request can optionally include include one of following parameters:
-
-
-        * authoredon
-
-        
-        * identifier
-
-
-        * intent
-
-
-        * status
-        
-       
-        Each MedicationRequest with intent of order must reference a MedicationRequest with intent plan within the basedOn element.
-
-        ## Use cases
-
-        Use cases covered by this endpoint include:
-
-        
-        * to get information about previously prescribed medication to display to the patient
-
-
-        * present previously prescribed repeat medications available to reorder
-
-
-      parameters:
-        - $ref: "#/components/parameters/BearerAuthorization"
-        - $ref: "#/components/parameters/CorrelationID"
-        - $ref: "#/components/parameters/RequestID"
-        - in: path
-          name: id
-          description: >
-            The NHS number of the patient whose requests you are searching for
-          required: true
-          schema:
-            type: string
-            example: '9912003489'
-        - in: query
-          name: authoredon
-          description: >
-            Date the prescription was requested, format: <eq|ge|le>YYYY-MM-DD. To use a range use authoredon=geYYYY-MM-DD&authoredon=leYYYY-MM-DD
-          required: false
-          schema:
-            type: string
-          examples:
-            exact date:
-              value:
-                eq2010-10-22
-              description: Exact match date
-            greater than or equals:
-              value:
-                ge2022-01-15
-              description: Greater than or equals which matches 2022-01-15 or 2022-01-16
-            less than or equals:
-              value:
-                le2022-01-15
-              description: Less than or equals which matches 2022-01-15 or 2022-01-14
-        - in: query
-          name: identifier
-          description: >
-            This will either be a uuid OR an EPS prescription identifier, this should only be used to obtain specific EPS orders using their identifier.
-
-
-            EPS prescription Identifier for the prescription. Searches for EPS prescriptions need to provide a data type of `https://fhir.nhs.uk/Id/prescription-order-number` in the format `<data-type>|<prescription-identifier>`
-          required: false
-          schema:
-            type: string
-          examples:
-            eps-prescription:
-              value: "https://fhir.nhs.uk/Id/prescription-order-number|CDT38E-Y765968-4FG3BQ"
-        - in: query
-          name: intent
-          description: >
-            Intent of the MedicationRequest, will either be plan or order. If plan is selected only MedicationRequest's with intent of plan will be returned.
-          required: false
-          schema:
-            type: string
-          examples:
-            intent:
-              value:
-                "plan"
-        - in: query
-          name: status
-          description: >
-            The type of status to search: you can find valid values [here](https://simplifier.net/guide/gp-connect--patient-facing-services--prescriptions/Home/FHIR-Assets/All-Assets/Profiles/UKCore-MedicationRequest?version=0.1.1-private-beta#status)
-          required: false
-          schema:
-            type: string
-            example: 'active'
-      responses:
-        '200':
-          description: Successful request to view previous prescription issue details
-          content:
-            application/fhir+json:
-              schema:
-                type: object
-                description: Information surrounding how the resource is populated can be found [here](https://simplifier.net/guide/gp-connect--patient-facing-services--prescriptions/Home/FHIR-Assets/All-Assets/Profiles/UKCore-MedicationRequest?version=0.1.1-private-beta).
-              examples:
-                GetResponsePreviousPrescriptionDetailed:
-                   $ref: "#/components/examples/GetResponsePreviousPrescriptionDetailed"
-                GetResponseMultiplePrescriptions:
-                  $ref: "#/components/examples/GetResponseMultiplePrescriptions"
-                GetResponseMethotrexate:
-                  $ref: "#/components/examples/GetResponseMethotrexate"
-                
-        4XX:
-          description: |
-            An error occurred as follows:
-
-
-            | HTTP Status | Spine error code   | Description
-            |-------------|--------------------|------------
-            | 404         | RESOURCE_NOT_FOUND | The request is for a MedicationRequest that doesn't exist
-            | 422         | INVALID_PARAMETER  | The MedicationRequest id supplied is invalid
-            | 422         | INVALID_PARAMETER  | The date is invalid or in future
-            | 422         | INVALID_PARAMETER  | The identifier value is invalid
-          content:
-            application/fhir+json:
-              schema:
-                type: object
-                description: Link to UKCore-OperationOutcome resource population guidance [here](https://simplifier.net/guide/gp-connect--patient-facing-services--prescriptions/Home/FHIR-Assets/All-Assets/Profiles/UKCore-OperationOutcome?version=0.1.1-private-beta).
-              examples:
-                InvalidRequestError:
-                  $ref: "#/components/examples/InvalidRequestError"
-                  
   /Task:
     post:
       operationId: post-task
@@ -1595,106 +1263,6 @@ paths:
                             - system: https://fhir.nhs.uk/R4/ValueSet/Spine-ErrorOrWarningCode-1
                               code: INVALID_PARAMETER
                               display: The Task id supplied is invalid
-  /PractitionerRole/{id}:
-    get:
-      operationId: get-practitioner-role
-      summary: Get practitioner role details
-      description: >
-        ## Overview
-
-
-        Use this endpoint to get details of practitioners issuing previous prescriptions.
-
-
-        The request must include the following parameter:
-
-
-        * id
-
-        * patient
-
-        ## Use cases
-
-        Use cases covered by this endpoint include:
-
-        * to present to the patient information about the practitioner who issued the previous prescriptions
-      parameters:
-        - $ref: "#/components/parameters/BearerAuthorization"
-        - $ref: "#/components/parameters/CorrelationID"
-        - $ref: "#/components/parameters/RequestID"
-        - in: path
-          name: id
-          description: >
-            The id of the practitioner role you are requesting details for.
-          required: true
-          schema:
-            type: string
-            example: 'ed313d93-f470-420f-ae4e-2b7eb91d3f45'
-        - in: query
-          name: patient
-          description: The NHS number of the patient
-          required: true
-          schema:
-            type: string
-            example: '9000000009'
-      responses:
-        '200':
-          description: Successful request to view practitioner role details
-          content:
-            application/fhir+json:
-              schema:
-                type: object
-                description: Information surrounding how the PractitionerRole resource is populated can be found [here](https://simplifier.net/guide/gp-connect--patient-facing-services--prescriptions/Home/FHIR-Assets/All-Assets/Profiles/UKCore-PractitionerRole?version=0.1.1-private-beta).
-              examples:
-                example:
-                  value:
-                    resourceType: PractitionerRole
-                    meta:
-                      profile:
-                        - https://fhir.hl7.org.uk/StructureDefinition/UKCore-PractitionerRole                
-                    id: e35f0382-ac2e-47f9-9164-afd7d6adf952
-                    practitioner:
-                      display: "Dr Jane Smith"
-                      identifier:
-                        system: https://fhir.hl7.org.uk/Id/gmc-number
-                        value: C9876543
-                    organization:
-                      identifier:
-                        system: https://fhir.nhs.uk/Id/ods-organization-code
-                        value: L8048
-        4XX:
-          description: |
-            An error occured as follows:
-
-
-            | HTTP Status | Spine error code   | Description
-            |-------------|--------------------|------------
-            | 400         | BAD_REQUEST        | X-Request-ID is not present
-            | 400         | INVALID_NHS_NUMBER | The NHS number provided is invalid, for example it fails format or check digit tests  
-            | 403         | ACCESS_DENIED      | Access denied, the patient logged in does not have the correct access level
-            | 404         | RESOURCE_NOT_FOUND | The request is for a PractitionerRole that doesn't exist
-            | 422         | INVALID_PARAMETER  | The PractitionerRole id supplied is invalid  
-            | 422         | INVALID_PARAMETER  | The patient parameter is not provided 
-          content:
-            application/fhir+json:
-              schema:
-                type: object
-                description: Link to UKCore-OperationOutcome resource population guidance [here](https://simplifier.net/guide/gp-connect--patient-facing-services--prescriptions/Home/FHIR-Assets/All-Assets/Profiles/UKCore-OperationOutcome?version=0.1.1-private-beta).
-              examples:
-                example:
-                  value:
-                    resourceType: OperationOutcome
-                    meta:
-                      profile:
-                        - https://fhir.hl7.org.uk/StructureDefinition/UKCore-OperationOutcome
-                    issue:
-                      - severity: error
-                        code: value
-                        details:
-                          coding:
-                            - system: https://fhir.nhs.uk/R4/ValueSet/Spine-ErrorOrWarningCode-1
-                              code: INVALID_PARAMETER
-                              display: The PractitionerRole id supplied is invalid
 components:
   parameters:
     BearerAuthorization:
